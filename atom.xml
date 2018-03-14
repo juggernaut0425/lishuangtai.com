@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>LISHUANGTAI</title>
+  
+  <subtitle>聚沙成塔</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://lishuangtai.com/"/>
+  <updated>2018-03-14T03:38:47.768Z</updated>
+  <id>http://lishuangtai.com/</id>
+  
+  <author>
+    <name>Shuangtai Li</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Maven依赖机制</title>
+    <link href="http://lishuangtai.com/2017/04/30/Maven%E4%BE%9D%E8%B5%96%E6%9C%BA%E5%88%B6/"/>
+    <id>http://lishuangtai.com/2017/04/30/Maven依赖机制/</id>
+    <published>2017-04-30T14:27:43.000Z</published>
+    <updated>2018-03-14T03:38:47.768Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Maven依赖管理"><a href="#Maven依赖管理" class="headerlink" title="Maven依赖管理"></a>Maven依赖管理</h1><p>本文主要介绍 Maven依赖管理 的基础，以及借助 Maven2.0.9 之后新增 import dependencies 实现依赖信息集中化管理 </p><h2 id="基础介绍"><a href="#基础介绍" class="headerlink" title="基础介绍"></a>基础介绍</h2><ul><li><p>依赖传递 Transitive dependency </p><pre><code>依赖包的依赖，自动加入依赖树 - 这是 Maven依赖机制 的核心。</code></pre></li><li><p>依赖调解 Dependency mediation </p><pre><code>由于传递依赖，产品版本冲突时，采用最近声明的版本:A-&gt;B-C2.0  与 A-&gt;C1.0  采用 C1.0</code></pre></li></ul><a id="more"></a><ul><li><p>依赖范围 Dependency Scope</p><p>  <strong><em>尽量设置 Scope，避免引入不必要的依赖包</em></strong></p><pre><code>* compile    默认，该依赖会传递。* provided    容器或者jdk已经提供，该依赖只用在 compile 和 test, 不传递。* runtime    只在运行时需要，在 compile 时不会加入 compile classpath，传递。* test    test compile 和 execution 生效，不传递。* system    不推荐* import         见下节</code></pre></li><li><p>dependencyManagement</p><ul><li>用于维护依赖信息: scope, type, version</li><li><p>比依赖调解优先级高 例如：</p><pre><code>parent pom &lt;dependencyManagement&gt; 指定 A1.0B 继承 parent, 项目依赖 C项目C 项目指定 A2.0最终 B 项目会使用 A1.0</code></pre></li></ul></li></ul><h2 id="依赖管理实践"><a href="#依赖管理实践" class="headerlink" title="依赖管理实践"></a>依赖管理实践</h2><p>为了保证依赖信息的一致性与可维护性，需要将<strong>依赖信息集中化管理</strong>。依赖信息不仅仅包括 version，还包括：scope, type。</p><p>具体操作：</p><ol><li>创建依赖信息管理项目，\&lt;packaging>为 pom;</li><li>在 \&lt;dependencyManagement> 维护依赖信息</li><li>使用处借助 <code>&lt;scope&gt;import&lt;/scope&gt;</code> 引入之前创建的项目, 只要指定依赖的 groupId 与 artifactId 即可。</li></ol><p><strong>参照:</strong></p><p><a href="http://docs.spring.io/spring-boot/docs/1.5.3.RELEASE/reference/htmlsingle/#using-boot-maven-without-a-parent" target="_blank" rel="noopener">Spring Boot</a> 导入依赖就是使用了该方式。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependencyManagement&gt;</span><br><span class="line">     &lt;dependencies&gt;</span><br><span class="line">        &lt;dependency&gt;</span><br><span class="line">            &lt;!-- Import dependency management from Spring Boot --&gt;</span><br><span class="line">            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">            &lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;</span><br><span class="line">            &lt;version&gt;1.5.3.RELEASE&lt;/version&gt;</span><br><span class="line">            &lt;type&gt;pom&lt;/type&gt;</span><br><span class="line">            &lt;scope&gt;import&lt;/scope&gt;</span><br><span class="line">        &lt;/dependency&gt;</span><br><span class="line">    &lt;/dependencies&gt;</span><br><span class="line">&lt;/dependencyManagement&gt;</span><br></pre></td></tr></table></figure><h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ul><li><a href="https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html" target="_blank" rel="noopener">Maven 依赖机制</a></li><li><a href="https://maven.apache.org/guides/index.html" target="_blank" rel="noopener">Maven 官方文档</a></li><li><a href="https://maven.apache.org/plugins/index.html" target="_blank" rel="noopener">Maven 常用插件</a></li></ul>]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;Maven依赖管理&quot;&gt;&lt;a href=&quot;#Maven依赖管理&quot; class=&quot;headerlink&quot; title=&quot;Maven依赖管理&quot;&gt;&lt;/a&gt;Maven依赖管理&lt;/h1&gt;&lt;p&gt;本文主要介绍 Maven依赖管理 的基础，以及借助 Maven2.0.9 之后新增 import dependencies 实现依赖信息集中化管理 &lt;/p&gt;
+&lt;h2 id=&quot;基础介绍&quot;&gt;&lt;a href=&quot;#基础介绍&quot; class=&quot;headerlink&quot; title=&quot;基础介绍&quot;&gt;&lt;/a&gt;基础介绍&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;依赖传递 Transitive dependency &lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;依赖包的依赖，自动加入依赖树 - 这是 Maven依赖机制 的核心。
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;依赖调解 Dependency mediation &lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;由于传递依赖，产品版本冲突时，采用最近声明的版本:
+A-&amp;gt;B-C2.0  与 A-&amp;gt;C1.0  采用 C1.0
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;/ul&gt;
+    
+    </summary>
+    
+    
+  </entry>
+  
+</feed>

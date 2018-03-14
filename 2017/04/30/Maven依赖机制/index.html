@@ -1,0 +1,61 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> Maven依赖机制 · LISHUANGTAI</title><meta name="description" content="Maven依赖机制 - Shuangtai Li"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="search" type="application/opensearchdescription+xml" href="http://lishuangtai.com/atom.xml" title="LISHUANGTAI"></head><body><div class="wrap"><header><a href="/" class="logo-link"><img src="/favicon.png" alt="logo"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="http://weibo.com/sunchongsheng" target="_blank" class="nav-list-link">WEIBO</a></li><li class="nav-list-item"><a href="https://github.com/juggernaut0425" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li></ul></header><main class="container"><div class="post"><article class="post-block"><h1 class="post-title">Maven依赖机制</h1><div class="post-info">Apr 30, 2017</div><div class="post-content"><h1 id="Maven依赖管理"><a href="#Maven依赖管理" class="headerlink" title="Maven依赖管理"></a>Maven依赖管理</h1><p>本文主要介绍 Maven依赖管理 的基础，以及借助 Maven2.0.9 之后新增 import dependencies 实现依赖信息集中化管理 </p>
+<h2 id="基础介绍"><a href="#基础介绍" class="headerlink" title="基础介绍"></a>基础介绍</h2><ul>
+<li><p>依赖传递 Transitive dependency </p>
+<pre><code>依赖包的依赖，自动加入依赖树 - 这是 Maven依赖机制 的核心。
+</code></pre></li>
+<li><p>依赖调解 Dependency mediation </p>
+<pre><code>由于传递依赖，产品版本冲突时，采用最近声明的版本:
+A-&gt;B-C2.0  与 A-&gt;C1.0  采用 C1.0
+</code></pre></li>
+</ul>
+<a id="more"></a>
+<ul>
+<li><p>依赖范围 Dependency Scope</p>
+<p>  <strong><em>尽量设置 Scope，避免引入不必要的依赖包</em></strong></p>
+<pre><code>* compile
+
+    默认，该依赖会传递。
+* provided
+
+    容器或者jdk已经提供，该依赖只用在 compile 和 test, 不传递。
+* runtime
+
+    只在运行时需要，在 compile 时不会加入 compile classpath，传递。
+* test
+
+    test compile 和 execution 生效，不传递。
+* system
+
+    不推荐
+* import     
+
+    见下节
+</code></pre></li>
+<li><p>dependencyManagement</p>
+<ul>
+<li>用于维护依赖信息: scope, type, version</li>
+<li><p>比依赖调解优先级高 例如：</p>
+<pre><code>parent pom &lt;dependencyManagement&gt; 指定 A1.0
+B 继承 parent, 项目依赖 C项目
+C 项目指定 A2.0
+最终 B 项目会使用 A1.0
+</code></pre></li>
+</ul>
+</li>
+</ul>
+<h2 id="依赖管理实践"><a href="#依赖管理实践" class="headerlink" title="依赖管理实践"></a>依赖管理实践</h2><p>为了保证依赖信息的一致性与可维护性，需要将<strong>依赖信息集中化管理</strong>。依赖信息不仅仅包括 version，还包括：scope, type。</p>
+<p>具体操作：</p>
+<ol>
+<li>创建依赖信息管理项目，\&lt;packaging>为 pom;</li>
+<li>在 \&lt;dependencyManagement> 维护依赖信息</li>
+<li>使用处借助 <code>&lt;scope&gt;import&lt;/scope&gt;</code> 引入之前创建的项目, 只要指定依赖的 groupId 与 artifactId 即可。</li>
+</ol>
+<p><strong>参照:</strong></p>
+<p><a href="http://docs.spring.io/spring-boot/docs/1.5.3.RELEASE/reference/htmlsingle/#using-boot-maven-without-a-parent" target="_blank" rel="noopener">Spring Boot</a> 导入依赖就是使用了该方式。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependencyManagement&gt;</span><br><span class="line">     &lt;dependencies&gt;</span><br><span class="line">        &lt;dependency&gt;</span><br><span class="line">            &lt;!-- Import dependency management from Spring Boot --&gt;</span><br><span class="line">            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">            &lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;</span><br><span class="line">            &lt;version&gt;1.5.3.RELEASE&lt;/version&gt;</span><br><span class="line">            &lt;type&gt;pom&lt;/type&gt;</span><br><span class="line">            &lt;scope&gt;import&lt;/scope&gt;</span><br><span class="line">        &lt;/dependency&gt;</span><br><span class="line">    &lt;/dependencies&gt;</span><br><span class="line">&lt;/dependencyManagement&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ul>
+<li><a href="https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html" target="_blank" rel="noopener">Maven 依赖机制</a></li>
+<li><a href="https://maven.apache.org/guides/index.html" target="_blank" rel="noopener">Maven 官方文档</a></li>
+<li><a href="https://maven.apache.org/plugins/index.html" target="_blank" rel="noopener">Maven 常用插件</a></li>
+</ul>
+</div></article></div></main><footer><div class="paginator"></div><div class="copyright"><p>© 2015 - 2018 <a href="http://lishuangtai.com">Shuangtai Li</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/pinggod/hexo-theme-apollo" target="_blank">hexo-theme-apollo</a>.</p></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" integrity="sha384-crwIf/BuaWM9rM65iM+dWFldgQ1Un8jWZMuh3puxb8TOY9+linwLoI7ZHZT+aekW" crossorigin="anonymous"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"UA-65933410-1",'auto');ga('send','pageview');</script></body></html>
